@@ -2,7 +2,7 @@ ENTRY(_start)
 
 SECTIONS
 {
-    . = 0x40000000; /* RAM Base Address */
+    . = 0x40080000; /* RAM base + 0x80000: where QEMU loads a raw -kernel image (DTB sits at RAM base) */
 
     .text : {
         *(.text.boot)

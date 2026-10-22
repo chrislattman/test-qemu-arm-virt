@@ -30,9 +30,9 @@ static inline void enable_interrupts(void)  { asm volatile("msr daifclr, #2" :::
 static inline void disable_interrupts(void) { asm volatile("msr daifset, #2" ::: "memory"); }
 
 void trigger_sgi(uint32_t sgi_id) {
-    // Bits [23:16]: Target List Filter (0x02 = forward strictly to the current requesting CPU core)
+    // Bits [25:24]: Target List Filter (0b10 = forward strictly to the current requesting CPU core)
     // Bits [3:0]: SGI Interrupt ID Number
-    *GICD_SGIR = (2 << 16) | (sgi_id & 0xF);
+    *GICD_SGIR = (2 << 24) | (sgi_id & 0xF);
 }
 
 // The Unified C-Level Interrupt Vector Handler
@@ -80,8 +80,9 @@ void gic_init(void) {
     *GICD_CTLR = 0; // Disable distributor for configuration
     *GICC_CTLR = 0; // Disable CPU interface for configuration
 
-    // Writing a 1 to bits 1 and 2 marks them as Non-Secure interrupts
-    *GICD_IGROUPR |= (1 << HW_INT_SGI_ID) | (1 << SW_INT_SGI_ID);
+    // Leave SGIs in Group 0 (the reset default). GICD_CTLR/GICC_CTLR = 1 only
+    // enable Group 0, and Group 1 interrupts can't be acknowledged via GICC_IAR
+    // without GICC_CTLR.AckCtl, which would cause an endless IRQ storm.
 
     // Enable SGI 1 and SGI 2 (Bits 1 and 2 in the first ISENABLER register)
     *GICD_ISENABLER |= (1 << HW_INT_SGI_ID) | (1 << SW_INT_SGI_ID);
