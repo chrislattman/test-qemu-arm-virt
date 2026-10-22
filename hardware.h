@@ -15,7 +15,6 @@
 
 // Distributor Registers
 #define GICD_CTLR        ((volatile uint32_t *)(GIC_DIST_BASE + 0x000))
-#define GICD_IGROUPR     ((volatile uint32_t *)(GIC_DIST_BASE + 0x080))
 #define GICD_ISENABLER   ((volatile uint32_t *)(GIC_DIST_BASE + 0x100))
 #define GICD_SGIR        ((volatile uint32_t *)(GIC_DIST_BASE + 0xF00))
 
