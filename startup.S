@@ -2,6 +2,8 @@
 .global _start
 
 _start:
+    .cfi_startproc
+    .cfi_undefined x30          // Outermost frame for debuggers
     // Force CPU cores other than Core 0 into an infinite sleep loop
     mrs     x0, mpidr_el1
     and     x0, x0, #0xFF
@@ -29,6 +31,7 @@ master_cpu:
 
     // Defensive fallback hang loop
     b       hang
+    .cfi_endproc
 
 // --- ARMv8 Exception Vector Table Alignment Layout ---
 .align 11
@@ -49,6 +52,8 @@ vector_table:
     .align 7; b hang; .align 7; b hang; .align 7; b hang; .align 7; b hang
 
 irq_entry:
+    .cfi_startproc
+    .cfi_undefined x30          // Outermost frame for debuggers: return address is in ELR_EL1, not x30
     // Context Switch Save Pass: Push volatile working registers onto the stack
     sub     sp, sp, #256
     stp     x0, x1, [sp, #0]
@@ -79,3 +84,4 @@ irq_entry:
     ldp     x0, x1, [sp, #0]
     add     sp, sp, #256
     eret                        // Exception Return back to your super loop
+    .cfi_endproc

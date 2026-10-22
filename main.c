@@ -100,9 +100,13 @@ void main_app(void) {
     enable_interrupts(); // Unmask IRQs inside the Cortex-A53 core
     while (1) {
         uart_puts("Hello\r\n");
+#ifdef NDEBUG
         sleep_ms(1000);
+#endif
         uart_puts("World!\r\n");
+#ifdef NDEBUG
         trigger_sgi(HW_INT_SGI_ID); // Kick off the hardware -> software cascade
         sleep_ms(1000);
+#endif
     }
 }
