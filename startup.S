@@ -26,6 +26,16 @@ master_cpu:
     ldr     x0, =_stack_top
     mov     sp, x0
 
+    // Zero .bss, which C requires for zero-initialized statics
+    ldr     x0, =__bss_start
+    ldr     x1, =__bss_end
+zero_bss:
+    cmp     x0, x1
+    b.hs    zero_bss_done
+    str     xzr, [x0], #8
+    b       zero_bss
+zero_bss_done:
+
     // Jump straight to main architecture loop
     bl      main_app
 

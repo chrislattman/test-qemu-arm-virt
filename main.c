@@ -96,8 +96,10 @@ void gic_init(void) {
 }
 
 void main_app(void) {
+#ifdef NDEBUG
     gic_init();
     enable_interrupts(); // Unmask IRQs inside the Cortex-A53 core
+#endif
     while (1) {
         uart_puts("Hello\r\n");
 #ifdef NDEBUG
