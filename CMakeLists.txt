@@ -18,32 +18,29 @@ set(CMAKE_C_FLAGS_MINSIZEREL "-Os -DNDEBUG")
 add_executable(baremetal.elf startup.S main.c)
 target_link_options(baremetal.elf PRIVATE
     -nostdlib -T ${CMAKE_SOURCE_DIR}/linker.ld)
+set_target_properties(baremetal.elf PROPERTIES LINK_DEPENDS ${CMAKE_SOURCE_DIR}/linker.ld)
 
 # Extract raw flat execution binary
 add_custom_command(TARGET baremetal.elf POST_BUILD
     COMMAND aarch64-none-elf-objcopy -O binary baremetal.elf baremetal.bin)
 
+set(QEMU_COMMAND
+    qemu-system-aarch64
+    -M virt
+    -cpu cortex-a53
+    -nographic
+    -serial telnet:localhost:5678,server=on,wait=off
+    -kernel baremetal.bin)
+
 add_custom_target(qemu
-    COMMAND qemu-system-aarch64
-        -M virt
-        -cpu cortex-a53
-        -nographic
-        -serial telnet:localhost:5678,server=on,wait=off
-        -kernel baremetal.bin
+    COMMAND ${QEMU_COMMAND}
     DEPENDS baremetal.elf
     USES_TERMINAL
     VERBATIM
 )
 
 add_custom_target(qemu_debug
-    COMMAND qemu-system-aarch64
-        -M virt
-        -cpu cortex-a53
-        -nographic
-        -serial telnet:localhost:5678,server=on,wait=off
-        -kernel baremetal.bin
-        -S
-        -s
+    COMMAND ${QEMU_COMMAND} -S -s
     DEPENDS baremetal.elf
     USES_TERMINAL
     VERBATIM
